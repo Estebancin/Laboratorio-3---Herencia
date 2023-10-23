@@ -1,0 +1,6 @@
+﻿1,100,10,0,disponible,Apartamento,true,2
+2,200,5,5,reservado,Apartamento,false,3
+3,150,0,10,vendido,Apartamento,true,1
+4,300,8,2,reservado,Oficina,10,true
+5,250,7,3,vendido,Oficina,8,false
+6,350,10,0,reservado,Amenidad,salón social,50
