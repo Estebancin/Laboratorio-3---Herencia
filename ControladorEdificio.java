@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ControladorEdificio {
     private List<Espacio> espacios;
 
@@ -13,13 +12,12 @@ public class ControladorEdificio {
         espacios = new ArrayList<>();
     }
 
-    // Método para cargar espacios desde un archivo CSV
     public void cargarEspacios(String rutaArchivo) {
         try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
             String linea;
             while ((linea = reader.readLine()) != null) {
-                String[] campos = linea.split(",");
-                if (campos[0].matches("-?\\d+")) {
+                String[] campos = linea.split("\\|");
+                if (campos.length >= 5) {
                     int id = Integer.parseInt(campos[0]);
                     double metrosCuadrados = Double.parseDouble(campos[1]);
                     int cantidadDisponible = Integer.parseInt(campos[2]);
@@ -27,38 +25,24 @@ public class ControladorEdificio {
                     String estado = campos[4];
                     String categoria = campos[5];
     
-                    if (categoria.equals("Apartamento")) {
-                        boolean lineaBlanca = Boolean.parseBoolean(campos[6]);
+                    if (categoria.equals("Apartamento") && campos.length >= 8) {
+                        boolean lineaBlanca = campos[6].equals("true");
                         int habitaciones = Integer.parseInt(campos[7]);
-                        espacios.add(new Apartamento(id, metrosCuadrados, cantidadDisponible,
-                                                     cantidadVendidos, estado,
-                                                     lineaBlanca, habitaciones));
-                    } else if (categoria.equals("Oficina")) {
-                        if (campos.length > 9) {
-                            int totalParqueos = Integer.parseInt(campos[8]);
-                            boolean mantenimiento = Boolean.parseBoolean(campos[9]);
-                            espacios.add(new Oficina(id, metrosCuadrados,
-                                                     cantidadDisponible,
-                                                     cantidadVendidos,
-                                                     estado,
-                                                     totalParqueos,
-                                                     mantenimiento));
+                        espacios.add(new Apartamento(id, metrosCuadrados, cantidadDisponible, cantidadVendidos, estado, lineaBlanca, habitaciones));
+                    } else if (categoria.equals("Oficina") && campos.length >= 8) {
+                        int totalParqueos = 0;
+                        if (!campos[6].isEmpty()) {
+                            totalParqueos = Integer.parseInt(campos[6]);
                         }
-                    } else if (categoria.equals("Amenidad")) {
-                        if (campos.length > 11) {
-                            String tipo = campos[10];
-                            int capacidad = Integer.parseInt(campos[11]);
-                            espacios.add(new Amenidad(id,
-                                                      metrosCuadrados,
-                                                      cantidadDisponible,
-                                                      cantidadVendidos,
-                                                      estado,
-                                                      tipo,
-                                                      capacidad));
-                        }
+                        boolean mantenimiento = campos[7].equals("true");
+                        espacios.add(new Oficina(id, metrosCuadrados, cantidadDisponible, cantidadVendidos, estado, totalParqueos, mantenimiento));
+                    } else if (categoria.equals("Amenidad") && campos.length >= 8) {
+                        String tipo = campos[6].isEmpty() ? "Desconocido" : campos[6];
+                        int capacidad = campos[7].isEmpty() ? 0 : Integer.parseInt(campos[7]);
+                        espacios.add(new Amenidad(id, metrosCuadrados, cantidadDisponible, cantidadVendidos, estado, tipo, capacidad));
                     }
                 } else {
-                    System.out.println("El ID " + campos[0] + " no es un número válido.");
+                    System.out.println("Error en el formato de línea: " + linea);
                 }
             }
         } catch (IOException e) {
@@ -67,6 +51,7 @@ public class ControladorEdificio {
     }
     
 
+    // Método para buscar un espacio por ID
     public Espacio buscarEspacio(int id) {
         for (Espacio espacio : espacios) {
             if (espacio.getId() == id) {
@@ -76,6 +61,7 @@ public class ControladorEdificio {
         return null;
     }
 
+    // Método para listar espacios por categoría
     public List<Espacio> listarEspaciosPorCategoria(String categoria) {
         List<Espacio> espaciosPorCategoria = new ArrayList<>();
         for (Espacio espacio : espacios) {
@@ -86,46 +72,68 @@ public class ControladorEdificio {
         return espaciosPorCategoria;
     }
 
+    // Método para mostrar estados por categoría
     public void mostrarEstadosPorCategoria(String categoria) {
-        for (Espacio espacio : espacios) {
-            if (espacio.getClass().getSimpleName().equals(categoria)) {
-                System.out.println("ID: " + espacio.getId() + ", Estado: " + espacio.getEstado());
+        List<Espacio> espaciosPorCategoria = listarEspaciosPorCategoria(categoria);
+        System.out.println("Estados de " + categoria + ":");
+
+        for (Espacio espacio : espaciosPorCategoria) {
+            System.out.println("ID: " + espacio.getId() + ", Estado: " + espacio.getEstado());
+        }
+    }
+
+    // Método para generar el listado de categorías con el total de espacios registrados
+    public void generarInformeCategorias() {
+        int totalApartamentos = listarEspaciosPorCategoria("Apartamento").size();
+        int totalOficinas = listarEspaciosPorCategoria("Oficina").size();
+        int totalAmenidades = listarEspaciosPorCategoria("Amenidad").size();
+
+        System.out.println("1. Listado de categorías con el total de espacios registrados");
+        System.out.println("a. Apartamentos - " + totalApartamentos);
+        System.out.println("b. Oficinas - " + totalOficinas);
+        System.out.println("c. Amenidades - " + totalAmenidades);
+    }
+
+    // Método para generar el listado de espacios por categoría
+    public void generarInformeEspaciosPorCategoria(String categoria) {
+        List<Espacio> espaciosPorCategoria = listarEspaciosPorCategoria(categoria);
+
+        System.out.println("2. Listado de espacios por categoría " + categoria + ":");
+        for (Espacio espacio : espaciosPorCategoria) {
+            if (categoria.equals("Apartamento") && espacio instanceof Apartamento) {
+                Apartamento apartamento = (Apartamento) espacio;
+                System.out.println("a. Apartamentos " + apartamento.getHabitaciones() + " Habitación - ID: " + apartamento.getId());
+            } else if (categoria.equals("Oficina") && espacio instanceof Oficina) {
+                Oficina oficina = (Oficina) espacio;
+                System.out.println("b. Oficinas con " + oficina.getTotalParqueos() + " parqueos - ID: " + oficina.getId());
+            } else if (categoria.equals("Amenidad") && espacio instanceof Amenidad) {
+                Amenidad amenidad = (Amenidad) espacio;
+                System.out.println("c. Amenidades de tipo " + amenidad.getTipo() + " - ID: " + amenidad.getId());
             }
         }
     }
 
-    public void generarInforme() {
-        System.out.println("Listado de categorías con el total de espacios registrados:");
-        System.out.println("Apartamentos: " + listarEspaciosPorCategoria("Apartamento").size());
-        System.out.println("Oficinas: " + listarEspaciosPorCategoria("Oficina").size());
-        System.out.println("Amenidades: " + listarEspaciosPorCategoria("Amenidad").size());
+    // Método para generar el total de espacios por estado
+    public void generarInformeEstadosPorCategoria(String categoria) {
+        List<Espacio> espaciosPorCategoria = listarEspaciosPorCategoria(categoria);
+        System.out.println("3. Total de espacios por estado " + categoria + ":");
 
-        System.out.println("\nListado de espacios por categoría:");
-        for (Espacio espacio : espacios) {
-            if (espacio instanceof Apartamento) {
-                System.out.println("Apartamento con " + ((Apartamento) espacio).getHabitaciones() + " habitaciones");
-            } else if (espacio instanceof Oficina) {
-                System.out.println("Oficina con " + ((Oficina) espacio).getTotalParqueos() + " parqueos");
-            } else if (espacio instanceof Amenidad) {
-                System.out.println("Amenidad de tipo " + ((Amenidad) espacio).getTipo());
-            }
-        }
+        int reservados = 0;
+        int vendidos = 0;
+        int disponibles = 0;
 
-        System.out.println("\nTotal de espacios por estado:");
-        int apartamentosReservados = 0;
-        int apartamentosVendidos = 0;
-        int apartamentosDisponibles = 0;
-        for (Espacio espacio : listarEspaciosPorCategoria("Apartamento")) {
+        for (Espacio espacio : espaciosPorCategoria) {
             if (espacio.getEstado().equals("reservado")) {
-                apartamentosReservados++;
+                reservados++;
             } else if (espacio.getEstado().equals("vendido")) {
-                apartamentosVendidos++;
+                vendidos++;
             } else if (espacio.getEstado().equals("disponible")) {
-                apartamentosDisponibles++;
+                disponibles++;
             }
         }
-        System.out.println("Apartamentos reservados: " + apartamentosReservados);
-        System.out.println("Apartamentos vendidos: " + apartamentosVendidos);
-        System.out.println("Apartamentos disponibles: " + apartamentosDisponibles);
+
+        System.out.println("a. " + categoria + " reservados: " + reservados);
+        System.out.println("b. " + categoria + " vendidos: " + vendidos);
+        System.out.println("c. " + categoria + " disponibles: " + disponibles);
     }
 }
