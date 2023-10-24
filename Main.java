@@ -1,10 +1,18 @@
+/**
+ * La clase Main permite interactuar con el usuario
+ * y realizar operaciones en el edificio, como buscar espacios por ID, listar espacios por
+ * categoría, mostrar estados por categoría y generar informes.
+ *
+ * @author Esteban Ramírez y Dhastry Secaira
+ * Fecha de creación: 19/10/23
+ * Fecha de última modificación: 23/10/23
+ */
 import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ControladorEdificio controlador = new ControladorEdificio();
-        controlador.cargarEspacios("espacios.csv"); // Cargar automáticamente el archivo "espacios.csv"
+        controlador.cargarEspacios("espacios.csv"); 
 
         System.out.println("Por favor, elige una opción:");
         System.out.println("1. Buscar espacio por ID");
@@ -17,7 +25,7 @@ public class Main {
 
         while (opcion != 5) {
             if (opcion == 1) {
-                System.out.println("Por favor, introduce el ID del espacio:");
+                System.out.println("Por favor, introduce el ID del espacio (1-6):");
                 int id = scanner.nextInt();
                 Espacio espacio = controlador.buscarEspacio(id);
                 if (espacio != null) {
