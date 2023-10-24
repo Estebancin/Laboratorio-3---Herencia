@@ -1,3 +1,11 @@
+/**
+ * La clase ControladorEdificio se encarga de gestionar las operaciones relacionadas con
+ * los espacios en el edificio, como cargar espacios desde un archivo CSV, buscar espacios por ID,
+ * listar espacios por categoría, mostrar estados de espacios por categoría y generar informes.
+ * Esta clase administra una lista de objetos de tipo Espacio.
+ * 
+ * @author Esteban Ramírez y Dhastry Secaira
+ */
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -6,12 +14,19 @@ import java.util.List;
 
 public class ControladorEdificio {
     private List<Espacio> espacios;
-
-    // Constructor
+    /**
+    * Constructor para crear un objeto ControladorEdificio.
+    * Inicializa la lista de espacios como un nuevo ArrayList.
+    */
     public ControladorEdificio() {
         espacios = new ArrayList<>();
     }
-
+    /**
+     * Carga los datos de los espacios desde un archivo CSV y crea objetos de tipo
+     * Apartamento, Oficina o Amenidad según la categoría de cada espacio.
+     *
+     * @param rutaArchivo Ruta del archivo CSV que contiene los datos de los espacios.
+     */
     public void cargarEspacios(String rutaArchivo) {
         try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
             String linea;
@@ -49,9 +64,12 @@ public class ControladorEdificio {
             e.printStackTrace();
         }
     }
-    
-
-    // Método para buscar un espacio por ID
+    /**
+     * Busca un espacio por su identificador único (ID).
+     *
+     * @param id El ID del espacio que se desea buscar.
+     * @return El espacio encontrado o null si no se encontró ningún espacio con el ID especificado.
+     */   
     public Espacio buscarEspacio(int id) {
         for (Espacio espacio : espacios) {
             if (espacio.getId() == id) {
@@ -60,8 +78,12 @@ public class ControladorEdificio {
         }
         return null;
     }
-
-    // Método para listar espacios por categoría
+    /**
+     * Lista los espacios de una categoría específica.
+     *
+     * @param categoria La categoría de espacios que se desea listar (por ejemplo, "Apartamento").
+     * @return Una lista de espacios que pertenecen a la categoría especificada.
+     */
     public List<Espacio> listarEspaciosPorCategoria(String categoria) {
         List<Espacio> espaciosPorCategoria = new ArrayList<>();
         for (Espacio espacio : espacios) {
@@ -71,8 +93,11 @@ public class ControladorEdificio {
         }
         return espaciosPorCategoria;
     }
-
-    // Método para mostrar estados por categoría
+    /**
+     * Muestra los estados de los espacios por categoría.
+     *
+     * @param categoria La categoría de espacios de la cual se mostrarán los estados (por ejemplo, "Apartamento").
+     */
     public void mostrarEstadosPorCategoria(String categoria) {
         List<Espacio> espaciosPorCategoria = listarEspaciosPorCategoria(categoria);
         System.out.println("Estados de " + categoria + ":");
@@ -81,8 +106,9 @@ public class ControladorEdificio {
             System.out.println("ID: " + espacio.getId() + ", Estado: " + espacio.getEstado());
         }
     }
-
-    // Método para generar el listado de categorías con el total de espacios registrados
+    /**
+     * Genera un informe con el total de espacios registrados para cada categoría.
+     */
     public void generarInformeCategorias() {
         int totalApartamentos = listarEspaciosPorCategoria("Apartamento").size();
         int totalOficinas = listarEspaciosPorCategoria("Oficina").size();
@@ -93,8 +119,12 @@ public class ControladorEdificio {
         System.out.println("b. Oficinas - " + totalOficinas);
         System.out.println("c. Amenidades - " + totalAmenidades);
     }
-
-    // Método para generar el listado de espacios por categoría
+    /**
+     * Genera un informe de los espacios por categoría, con información específica
+     * dependiendo del tipo de espacio.
+     *
+     * @param categoria La categoría de espacios para la cual se generará el informe.
+     */
     public void generarInformeEspaciosPorCategoria(String categoria) {
         List<Espacio> espaciosPorCategoria = listarEspaciosPorCategoria(categoria);
 
@@ -112,8 +142,11 @@ public class ControladorEdificio {
             }
         }
     }
-
-    // Método para generar el total de espacios por estado
+    /**
+     * Genera un informe del total de espacios por estado para una categoría específica.
+     *
+     * @param categoria La categoría de espacios de la cual se generará el informe.
+     */
     public void generarInformeEstadosPorCategoria(String categoria) {
         List<Espacio> espaciosPorCategoria = listarEspaciosPorCategoria(categoria);
         System.out.println("3. Total de espacios por estado " + categoria + ":");
